@@ -1,0 +1,29 @@
+{
+  "name": "basic-bash-write",
+  "prompt": "Use the bash tool to run exactly: echo ecc-parity-probe. Then create a file named probe.txt containing exactly: hi. Then you are done — reply with one short sentence.",
+  "checks": [
+    {
+      "file": "bash-commands.log",
+      "must_contain": ["echo ecc-parity-probe"]
+    },
+    {
+      "file": "session.md",
+      "must_contain": ["# Session:", "ECC:SUMMARY:START", "### Tasks", "### Tools Used"]
+    },
+    {
+      "file": "metrics.json",
+      "must_contain": ["\"session_id\""]
+    },
+    {
+      "file": "notify.log",
+      "must_contain": ["display notification"]
+    }
+  ],
+  "equivalence": [
+    { "file": "bash-commands.log", "mode": "lines" },
+    { "file": "metrics.json", "mode": "json-keys",
+      "keys": ["session_id", "tool_count", "files_modified", "recent_tools", "first_timestamp", "last_timestamp"],
+      "equal_keys": ["files_modified_count"] },
+    { "file": "compaction-log.txt", "mode": "exact" }
+  ]
+}

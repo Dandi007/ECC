@@ -1,0 +1,17 @@
+id: session:start
+schema: ecc.parity.v1
+script: scripts/hooks/session-start.js
+profiles: [minimal, standard, strict]
+trigger:
+  claude: SessionStart
+  opencode: "event:session.created"
+input:
+  source: "startup"            # CC: stdin.source; OC: 常量
+  cwd: "$PROJECT_DIR"
+effects:
+  - type: context-injection    # stdout JSON hookSpecificOutput.additionalContext
+    must_contain: ["Project type:"]
+    may_contain: ["ECC:SUMMARY"]   # 有上次会话存档时
+    verify: llm-request        # e2e 经 ccs payload 断言注入文本出现在首个 LLM 请求
+  - type: file-read
+    path: "$HOME/.claude/session-data/"   # 读最近 session 文件回注
