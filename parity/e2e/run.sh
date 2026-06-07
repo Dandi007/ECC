@@ -85,6 +85,11 @@ run_oc() {
 
 collect() { # $1 side, $2 home, $3 tmp — gather contract effect files
   local side="$1" home="$2" tmp="$3" out="$SANDBOX/$1/collected"
+  # detached hook children may still be flushing after the runtime exits
+  for _ in $(seq 1 15); do
+    ls "$home/.claude/session-data/"*-session.tmp >/dev/null 2>&1 && [ -f "$SANDBOX/$side/notify.log" ] && break
+    sleep 1
+  done
   mkdir -p "$out"
   cp "$home/.claude/session-data/"*-session.tmp "$out/session.md" 2>/dev/null || true
   cp "$home/.claude/session-data/compaction-log.txt" "$out/" 2>/dev/null || true

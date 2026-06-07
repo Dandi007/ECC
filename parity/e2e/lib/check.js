@@ -52,7 +52,14 @@ for (const eq of scenario.equivalence || []) {
     record(`parity:${eq.file}:exact`, a.trim() === b.trim(), a.trim() === b.trim() ? '' : 'normalized content differs');
   } else if (eq.mode === 'lines') {
     // same multiset of normalized lines (order-insensitive append logs)
-    const sortLines = s => s.trim().split('\n').map(l => l.trim()).filter(Boolean).sort().join('\n');
+    const sortLines = s =>
+      s
+        .trim()
+        .split('\n')
+        .map(l => l.trim())
+        .filter(Boolean)
+        .sort()
+        .join('\n');
     record(`parity:${eq.file}:lines`, sortLines(a) === sortLines(b));
   } else if (eq.mode === 'json-keys') {
     try {
@@ -61,8 +68,7 @@ for (const eq of scenario.equivalence || []) {
       const missing = (eq.keys || []).filter(k => !(k in ja) || !(k in jb));
       record(`parity:${eq.file}:json-keys`, missing.length === 0, missing.length ? `missing: ${missing}` : '');
       for (const k of eq.equal_keys || []) {
-        record(`parity:${eq.file}:json[${k}]`, JSON.stringify(ja[k]) === JSON.stringify(jb[k]),
-          `cc=${JSON.stringify(ja[k])} oc=${JSON.stringify(jb[k])}`);
+        record(`parity:${eq.file}:json[${k}]`, JSON.stringify(ja[k]) === JSON.stringify(jb[k]), `cc=${JSON.stringify(ja[k])} oc=${JSON.stringify(jb[k])}`);
       }
     } catch (e) {
       record(`parity:${eq.file}:json-keys`, false, `parse error: ${e.message}`);
