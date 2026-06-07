@@ -244,7 +244,7 @@ export const EccParity = async (ctx: { directory?: string }) => {
       }
     },
 
-    'chat.message': async (_input: { sessionID?: string }, output: { message?: { sessionID?: string; role?: string }; parts?: Array<{ type: string; text?: string }> }) => {
+    'chat.message': async (_input: { sessionID?: string }, output: { message?: { id?: string; sessionID?: string; role?: string }; parts?: Array<{ type: string; text?: string; id?: string; sessionID?: string; messageID?: string }> }) => {
       const sid = output?.message?.sessionID;
       if (!sid || output?.message?.role !== 'user' || !Array.isArray(output?.parts)) return;
       const s = state(sid);
@@ -254,10 +254,27 @@ export const EccParity = async (ctx: { directory?: string }) => {
         .map(p => p.text)
         .join('\n');
       if (text) s.transcript.push({ role: 'user', content: text });
-      // session-start context injection: prepend once, before the first user message
+      // session-start context injection: prepend once, before the first user message.
+      // Official opencode (>=1.16) schema-validates user parts on save: a bare
+      // {type,text} part dies with `Missing key ["id"]/["sessionID"]/["messageID"]`
+      // and the whole prompt fails silently (no assistant turn, no title). So we
+      // prepend into an existing text part (already carries valid keys); only if
+      // no text part exists do we unshift a new part with all required keys set.
       if (s.injection && !s.injected) {
         s.injected = true;
-        output.parts.unshift({ type: 'text', text: `<ecc-context>\n${s.injection}\n</ecc-context>` });
+        const ctx = `<ecc-context>\n${s.injection}\n</ecc-context>`;
+        const firstText = output.parts.find(p => p.type === 'text' && typeof p.text === 'string');
+        if (firstText) {
+          firstText.text = `${ctx}\n\n${firstText.text}`;
+        } else {
+          output.parts.unshift({
+            type: 'text',
+            text: ctx,
+            id: `prt_ecc${Date.now().toString(36)}${Math.random().toString(36).slice(2, 8)}`,
+            sessionID: sid,
+            messageID: output.message?.id,
+          });
+        }
       }
     },
 
