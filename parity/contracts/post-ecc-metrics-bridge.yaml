@@ -1,0 +1,17 @@
+id: post:ecc-metrics-bridge
+schema: ecc.parity.v1
+script: scripts/hooks/ecc-metrics-bridge.js
+profiles: [minimal, standard, strict]
+trigger:
+  claude: "PostToolUse[*]"
+  opencode: "tool.execute.after"
+input:
+  session_id: required
+  tool_name: required          # 经 tool_name_map 映射后传入
+  tool_input: required
+effects:
+  - type: file-write
+    path: "$TMPDIR/ecc-metrics-<SESSION_ID>.json"
+    format: json
+    keys: [session_id, tool_count, files_modified, recent_tools, first_timestamp, last_timestamp]
+    semantic: "tool_count 等于会话内工具调用次数；files_modified 含被改文件"

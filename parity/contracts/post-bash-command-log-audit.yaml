@@ -1,0 +1,15 @@
+id: post:bash:command-log-audit
+schema: ecc.parity.v1
+script: scripts/hooks/post-bash-dispatcher.js   # 经 dispatcher 保子 hook 门控语义一致
+profiles: fallback                              # dispatcher 内 per-sub-hook 自治
+trigger:
+  claude: "PostToolUse[Bash]"
+  opencode: "tool.execute.after[tool=bash]"
+input:
+  tool_name: "Bash"
+  tool_input: { command: required }
+effects:
+  - type: file-write
+    path: "$HOME/.claude/bash-commands.log"
+    format: append-line
+    must_match: '^\[<TIMESTAMP>\] <command>$'

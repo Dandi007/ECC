@@ -1,0 +1,20 @@
+id: stop:session-end
+schema: ecc.parity.v1
+script: scripts/hooks/session-end.js
+profiles: [minimal, standard, strict]
+trigger:
+  claude: Stop
+  opencode: "event:session.idle"
+input:
+  session_id: required
+  transcript_path: required    # OC 侧由 adapter 经 client API 合成 JSONL（shapes 见 notes）
+  cwd: optional
+effects:
+  - type: file-write
+    path: "$HOME/.claude/session-data/<DATE>-<SID8>-session.tmp"
+    format: markdown
+    must_contain: ["# Session:", "ECC:SUMMARY:START", "### Tasks", "### Files Modified", "### Tools Used"]
+notes: |
+  transcript 合成最小 shape（session-end.js 兼容解析）：
+    {"role":"user","content":"<text>"}
+    {"type":"assistant","message":{"content":[{"type":"tool_use","name":"<Tool>","input":{...}}]}}

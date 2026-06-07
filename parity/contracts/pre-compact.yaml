@@ -1,0 +1,18 @@
+id: pre:compact
+schema: ecc.parity.v1
+script: scripts/hooks/pre-compact.js
+profiles: [standard, strict]
+trigger:
+  claude: PreCompact
+  opencode: "experimental.session.compacting"   # hook key 待真机验证（spike 未覆盖）
+input:
+  trigger: "manual|auto"
+effects:
+  - type: file-write
+    path: "$HOME/.claude/session-data/compaction-log.txt"
+    format: append-line
+    must_match: '^\[<TIMESTAMP>\] Context compaction triggered$'
+  - type: file-write
+    path: "$HOME/.claude/session-data/<active-session>.tmp"
+    format: append
+    must_contain: ["[Compaction occurred"]

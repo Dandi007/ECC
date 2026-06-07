@@ -1,0 +1,13 @@
+id: stop:desktop-notify
+schema: ecc.parity.v1
+script: scripts/hooks/desktop-notify.js
+profiles: [standard, strict]
+trigger:
+  claude: Stop
+  opencode: "event:session.idle"
+input:
+  last_assistant_message: optional   # OC 侧 adapter 从 message.updated 缓存取末条 assistant 文本
+effects:
+  - type: os-notification
+    verify: stub                     # e2e 用 PATH 前置 osascript stub 落盘断言
+    must_contain: ["<summary>"]

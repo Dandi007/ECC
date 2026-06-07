@@ -1,0 +1,14 @@
+id: post:ecc-context-monitor
+schema: ecc.parity.v1
+script: scripts/hooks/ecc-context-monitor.js
+profiles: [standard, strict]
+trigger:
+  claude: "PostToolUse[*]"
+  opencode: "tool.execute.after"
+input:
+  session_id: required
+effects:
+  - type: file-write
+    path: "$TMPDIR/ecc-ctx-warn-<SESSION_ID>.json"
+    format: json
+    when: "阈值触发时（短会话可为空——两侧一致即可）"
