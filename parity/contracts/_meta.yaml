@@ -29,3 +29,5 @@ normalize:                           # diff 前豁免规则（两侧产物先 no
     replace: "<TMP>"
   - kind: path-prefix                # sandbox 根之下的绝对路径前缀
     replace: "<ROOT>"
+tool_input_key_map:                  # OpenCode camelCase → Claude Code snake_case
+  filePath: file_path
